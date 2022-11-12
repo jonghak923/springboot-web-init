@@ -1,8 +1,11 @@
 package com.jonghak.springbootweb.config;
 
+import com.jonghak.springbootweb.interceptor.AnotherInterceptor;
+import com.jonghak.springbootweb.interceptor.GreetingInterceptor;
 import com.jonghak.springbootweb.sample.PersonFormatter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
@@ -16,4 +19,17 @@ public class WebConfig implements WebMvcConfigurer {
 //    public void addFormatters(FormatterRegistry registry) {
 //        registry.addFormatter(new PersonFormatter());
 //    }
+
+
+    /**
+     * Handler Interceptors 추가!!
+     * @param registry
+     */
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new GreetingInterceptor()).order(1);
+        registry.addInterceptor(new AnotherInterceptor())
+                .addPathPatterns("/hello*")
+                .order(0);
+    }
 }
