@@ -1,5 +1,6 @@
 package com.jonghak.springbootweb.sample;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -35,6 +37,9 @@ class SampleControllerTest {
 
     @Autowired
     PersonRepository personRepository;
+
+    @Autowired
+    ObjectMapper objectMapper;
 
     @Test
     public void hello() throws Exception {
@@ -94,5 +99,29 @@ class SampleControllerTest {
                 .andExpect(header().exists(HttpHeaders.CACHE_CONTROL));
     }
 
+    @Test
+    public void stringMessage() throws Exception {
+        this.mockMvc.perform(get("/message")
+                        .content("hello message"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().string("hello message"));
+    }
 
+
+    @Test
+    public void jsonMessage() throws Exception {
+        Person person = new Person();
+        person.setId(2022l);
+        person.setName("jonghak");
+
+        String jsonString = objectMapper.writeValueAsString(person);
+
+        this.mockMvc.perform(get("/jsonMessage")
+                        .contentType(MediaType.APPLICATION_JSON)    // 서버(spring)가 어떤 컨버터를 사용할때 요청헤더의 contentType을 활용함 - 요청 보내는 데이터의 Type이 뭔지?
+                        .accept(MediaType.APPLICATION_JSON)         // 요청에 대한 응답 데이터의 Type이 뭔지?
+                        .content(jsonString))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
 }
