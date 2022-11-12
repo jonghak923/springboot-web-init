@@ -10,7 +10,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.oxm.Marshaller;
 import org.springframework.test.web.servlet.MockMvc;
+
+import javax.xml.transform.Result;
+import javax.xml.transform.stream.StreamResult;
+import java.io.StringWriter;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -40,6 +45,9 @@ class SampleControllerTest {
 
     @Autowired
     ObjectMapper objectMapper;
+
+    @Autowired
+    Marshaller marshaller; // spring에서 제공하는, XML 컨버터의 추상클래스를 주입받는다. (Spring-oxm)
 
     @Test
     public void hello() throws Exception {
@@ -122,6 +130,32 @@ class SampleControllerTest {
                         .accept(MediaType.APPLICATION_JSON)         // 요청에 대한 응답 데이터의 Type이 뭔지?
                         .content(jsonString))
                 .andDo(print())
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                // 응답 json 확인
+                .andExpect(jsonPath("$.id").value(2022))
+                .andExpect(jsonPath("$.name").value("jonghak"));
+    }
+
+    @Test
+    public void xmlMessage() throws Exception {
+        Person person = new Person();
+        person.setId(2022l);
+        person.setName("jonghak");
+
+        // 객체를 xml로 변경
+        StringWriter stringWriter = new StringWriter();
+        Result result = new StreamResult(stringWriter);
+        marshaller.marshal(person, result);
+        String xmlString = stringWriter.toString();
+
+        this.mockMvc.perform(get("/jsonMessage")
+                        .contentType(MediaType.APPLICATION_XML)    // 서버(spring)가 어떤 컨버터를 사용할때 요청헤더의 contentType을 활용함 - 요청 보내는 데이터의 Type이 뭔지?
+                        .accept(MediaType.APPLICATION_XML)         // 요청에 대한 응답 데이터의 Type이 뭔지?
+                        .content(xmlString))
+                .andDo(print())
+                .andExpect(status().isOk())
+                // 응답 xml 확인
+                .andExpect(xpath("person/name").string("jonghak"))
+                .andExpect(xpath("person/id").string("2022"));
     }
 }

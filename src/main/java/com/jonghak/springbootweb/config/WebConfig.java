@@ -2,11 +2,14 @@ package com.jonghak.springbootweb.config;
 
 import com.jonghak.springbootweb.interceptor.AnotherInterceptor;
 import com.jonghak.springbootweb.interceptor.GreetingInterceptor;
+import com.jonghak.springbootweb.sample.Person;
 import com.jonghak.springbootweb.sample.PersonFormatter;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.CacheControl;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -115,5 +118,22 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
         WebMvcConfigurer.super.extendMessageConverters(converters);
+    }
+
+    /**
+     * XML 메세지 컨버터 - JAXB2 를 사용하기 위해 Bean으로 등록
+     *
+     * - OXM(Object-XML Mapper) 라이브러리 중에 스프링이 지원하는 의존성 추가
+     *  1. JacksonXML
+     *  2. JAXB
+     *
+     * - 스프링 부트를 사용하는 경우
+     *  1. 기본으로 XML 의존성 추가해주지 않음.
+     */
+    @Bean
+    public Jaxb2Marshaller jaxb2Marshaller() {
+        Jaxb2Marshaller jaxb2Marshaller = new Jaxb2Marshaller();
+        jaxb2Marshaller.setPackagesToScan(Person.class.getPackageName()); // Jaxb2에서 @XmlRootElement 어노테이션을 스캔하는 설정 필요
+        return jaxb2Marshaller;
     }
 }
