@@ -158,4 +158,11 @@ class SampleControllerTest {
                 .andExpect(xpath("person/name").string("jonghak"))
                 .andExpect(xpath("person/id").string("2022"));
     }
+
+    @Test
+    public void viewControllerHi() throws Exception {
+        this.mockMvc.perform(get("/hi"))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
 }

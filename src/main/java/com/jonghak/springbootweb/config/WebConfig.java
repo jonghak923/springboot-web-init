@@ -3,20 +3,35 @@ package com.jonghak.springbootweb.config;
 import com.jonghak.springbootweb.interceptor.AnotherInterceptor;
 import com.jonghak.springbootweb.interceptor.GreetingInterceptor;
 import com.jonghak.springbootweb.sample.Person;
-import com.jonghak.springbootweb.sample.PersonFormatter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.format.FormatterRegistry;
 import org.springframework.http.CacheControl;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * - 스프링 mvc에서 @EnableWebMvc
+ *  1. 애노테이션 기반의 스프링 MVC 설정 간편화
+ *  2. WebMvcConfigurer가 제공하는 메소드를 구현하여 커스터마이징할 수 있다.
+ *
+ * - 스프링 부트
+ *  1. 스프링 부트 자동 설정을 통해 다양한 스프링 MVC 기능을 아무런 설정 파일을 만들지 않아도 제공한다.
+ *  2. WebMvcConfigurer가 제공하는 메소드를 구현하여 커스터마이징할 수 있다.
+ *  3. @EnableWebMvc를 사용하면 스프링 부트 자동 설정을 사용하지 못한다.
+ *
+ * - 스프링 MVC 설정 방법
+ *  1. 스프링 부트를 사용하는 경우에는 application.properties 부터 시작.
+ *  2, WebMvcConfigurer로 시작
+ *  3. @Bean으로 MVC 구성 요소 직접 등 : springBoot를 사용하는 경우 Bean을 등록해서 사용하는 경우는 극히 드물다.
+ *
+ */
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
@@ -135,5 +150,16 @@ public class WebConfig implements WebMvcConfigurer {
         Jaxb2Marshaller jaxb2Marshaller = new Jaxb2Marshaller();
         jaxb2Marshaller.setPackagesToScan(Person.class.getPackageName()); // Jaxb2에서 @XmlRootElement 어노테이션을 스캔하는 설정 필요
         return jaxb2Marshaller;
+    }
+
+    /**
+     * - 뷰 컨트롤러(viewController)
+     *  1. 단순하게 요청 URL을 특정 뷰로 연결하고 싶을 때 사용할 수 있다.
+     *      ex)     @GetMapping("hi")
+     *              public String getHi() { return "hi"; }
+     */
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+        registry.addViewController("/hi").setViewName("hi.html");
     }
 }
